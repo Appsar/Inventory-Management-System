@@ -4,8 +4,10 @@ const app = express();
 const path = require('path');
 
 const productRoutes = require('./routes/products');
+const suppliersRoutes = require('./routes/suppliers');
 
 app.use('/api', productRoutes);
+app.use('/api', suppliersRoutes);
 
 app.use(express.json());
 
