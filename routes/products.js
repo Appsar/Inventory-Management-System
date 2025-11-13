@@ -1,25 +1,29 @@
 const express = require('express');
+const { Pool } = require('pg');
 const router = express.Router();
 
 router.use(express.json())
 
-let products = [
-    { id: 1, name: "tractor", amount: 10, price: 5000, catagori: "vehicle" }
-]
-let nextID = 1;
+const pool = new Pool({
+    connectionString: "postgresql://postgres:password@localhost:5432/ims",
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillies: 2000,
+});
+
 
 // Create product
-router.post('/products', (req, res) => {
-    const { name, amount, price, catagori } = req.body;
+router.post('/products', async (req, res) => {
+    const { name, amount, price, category } = req.body;
 
-    if (!name || !amount || !price || !catagori) {
+    if (!name || !amount || !price || !category) {
         res.status(400).json({
             error: "Must include 'name', 'amount', 'price' and 'catagori'."
         });
         return;
     }
 
-    if (typeof name !== "string" || typeof catagori !== "string") {
+    if (typeof name !== "string" || typeof category !== "string") {
         res.status(400).json({
             error: "'name' and 'catagori' must be a string."
         });
@@ -33,23 +37,30 @@ router.post('/products', (req, res) => {
         return;
     }
 
+    try {
+        const query = "INSERT INTO products (name,price,category,amount) VALUES ($1,$2,$3,$4) RETURNING *";
+        const values = [name, price, category, amount];
 
-    let newProduct = {
-        id: nextID++,
-        name,
-        amount,
-        price,
-        catagori
+        const result = await pool.query(query, values);
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error("Database Fault:", error);
+        res.status(500).json({
+            error: "Could not create product."
+        });
     };
-
-    products.push(newProduct);
-
-    res.status(201).json(newProduct);
 });
 
 // Get ALL products
-router.get('/products', (req, res) => {
-    res.json(products);
+router.get('/products', async (req, res) => {
+    try {
+        const result = await pool.query("SELECT * FROM products");
+        res.json(result.rows);
+
+    } catch (error) {
+        console.error("DatabaseError:", error);
+        res.status(500).json({ error: "Server Fault" });
+    }
 });
 
 // Get specific product with id
@@ -61,16 +72,12 @@ router.get('/products/:id', (req, res) => {
         });
         return;
     }
-    const index = products.find(find => find.id === id);
 
-    if (index === undefined) {
-        res.status(400).json({
-            error: "Not a valid 'id'."
-        });
-        return;
-    }
+    //const index = products.find(find => find.id === id);
 
-    res.json(index);
+
+
+    res.json();
 });
 
 // Update specific product with id
@@ -84,7 +91,7 @@ router.put('/products/:id', (req, res) => {
         return;
     }
 
-    const index = products.findIndex(find => find.id === id);
+    //const index = products.findIndex(find => find.id === id);
 
     if (index === -1) {
         res.status(400).json({
@@ -124,14 +131,9 @@ router.put('/products/:id', (req, res) => {
         return;
     }
     //Update products
-    products[index] = {
-        ...users[index],
-        ...req.body,
-        id,
-        updateAt: new Date()
-    }
 
-    res.json(products[index]);
+
+    res.json();
 
 });
 
@@ -146,18 +148,13 @@ router.delete('/products/:id', (req, res) => {
         return;
     }
 
-    const index = products.findIndex(find => find.id === id);
+    //const index = products.findIndex(find => find.id === id);
 
-    if (index === -1) {
-        res.status(400).json({
-            error: "Not a valid 'id'."
-        });
-        return;
-    }
 
-    let deletedProduct = products.splice(index, 1);
 
-    res.json(deletedProduct);
+    //let deletedProduct = splice(index, 1);
+
+    res.json();
 
 });
 
