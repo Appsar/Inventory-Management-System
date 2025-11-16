@@ -9,9 +9,9 @@ router.use(express.json())
 
 // Create product
 router.post('/products', validateProduct, async (req, res) => {
-    const { name, amount, price, category } = req.body;
+    const { name, amount, price, category, supplier_id } = req.body;
     try {
-        const product = await productRepository.postProduct(name, amount, price, category);
+        const product = await productRepository.postProduct(name, amount, price, category, supplier_id);
         res.status(201).json({ message: "Product created.", product });
     } catch (error) {
         console.error("Database Fault:", error);
@@ -54,11 +54,11 @@ router.get('/products/:id', validateId, async (req, res) => {
 
 // Update specific product with id
 router.put('/products/:id', validateProduct, validateId, async (req, res) => {
-    const { name, amount, price, category } = req.body;
+    const { name, amount, price, category, supplier_id } = req.body;
     const id = parseInt(req.params.id);
     //Update products
     try {
-        const product = await productRepository.updateProduct(name, price, amount, category, id);
+        const product = await productRepository.updateProduct(name, price, amount, category, supplier_id, id);
         res.status(200).json({
             message: "Product update successfully",
             product

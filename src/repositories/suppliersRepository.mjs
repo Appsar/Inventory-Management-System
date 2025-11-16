@@ -1,0 +1,81 @@
+
+import e from 'express';
+import { pool } from '../config/pool.mjs';
+
+export async function getAllSuppliers() {
+    const result = await pool.query("SELECT * FROM suppliers");
+    return result.rows;
+}
+
+export async function getSupplierAmount(id) {
+
+    const query = "SELECT suppliers.*, COUNT(products.id) AS product_count FROM suppliers LEFT JOIN products ON suppliers.id = products.supplier_id WHERE suppliers.id = $1 GROUP BY suppliers.id"
+    const values = [id];
+
+    const result = await pool.query(query, values)
+
+    if (result.rows.length === 0) {
+        throw new Error("Supplier not found");
+    }
+
+    return result.rows[0];
+
+}
+
+export async function getAllProductsWithSupplier(id) {
+
+    const query = "SELECT products.id, products.name AS product_name, products.amount, products.price, products.category, suppliers.name AS supplier_name FROM products INNER JOIN product_suppliers ON products.id = product_suppliers.product_id INNER JOIN suppliers ON suppliers.id = product_suppliers.supplier_id WHERE suppliers.id = $1;"
+    const values = [id];
+
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) {
+        throw new Error("Supplier not found");
+    }
+
+    return result.rows;
+
+}
+
+export async function createSupplier(name, contactperson, email, phonenumber, country) {
+
+    const query = "INSERT INTO suppliers (name,contactperson,email,phonenumber,country) VALUES ($1, $2, $3, $4, $5) RETURNING *"
+    const values = [name, contactperson, email, phonenumber, country];
+
+
+    const result = await pool.query(query, values);
+
+
+    return result.rows[0];
+
+}
+
+export async function updateSupplier(name, contactperson, email, phonenumber, country, id) {
+
+    const query = "UPDATE suppliers SET name = $1, contactperson = $2, email = $3, phonenumber = $4, country = $5 WHERE ID = $6 RETURNING *"
+    const values = [name, contactperson, email, phonenumber, country, id];
+
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) {
+        throw new Error("Supplier not found");
+    }
+
+    return result.rows[0];
+
+}
+
+export async function deleteSupplier(id) {
+
+    const query = "DELETE FROM suppliers WHERE id = $1 RETURNING *";
+    const values = [id];
+
+    const result = await pool.query(query, values)
+
+    if (result.rows.length === 0) {
+        throw new Error("Supplier not found");
+    }
+
+    return result.rows[0];
+
+}
