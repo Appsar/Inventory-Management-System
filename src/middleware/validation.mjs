@@ -1,4 +1,4 @@
-
+//Validate product with the reqiured input data from body
 export const validateProduct = (req, res, next) => {
     const { name, amount, price, category, supplier_id } = req.body;
 
@@ -46,6 +46,7 @@ export const validateProduct = (req, res, next) => {
     next();
 }
 
+//Validate if id is a number
 export const validateId = (req, res, next) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -57,6 +58,7 @@ export const validateId = (req, res, next) => {
     next();
 }
 
+//Validate supplier with the reqiured input data from body
 export const validateSupplier = (req, res, next) => {
     const { name, contactperson, email, phonenumber, country } = req.body
 

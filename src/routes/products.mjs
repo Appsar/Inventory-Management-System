@@ -1,3 +1,4 @@
+//Import
 import express from 'express';
 import * as productRepository from '../repositories/productRepository.mjs';
 import { validateId, validateProduct } from '../middleware/validation.mjs';
@@ -9,11 +10,13 @@ router.use(express.json())
 
 // Create product
 router.post('/products', validateProduct, async (req, res) => {
+    //Needed input data from body
     const { name, amount, price, category, supplier_id } = req.body;
+
     try {
         const product = await productRepository.postProduct(name, amount, price, category, supplier_id);
         res.status(201).json({ message: "Product created.", product });
-    } catch (error) {
+    } catch (error) { //Error handeling for database
         if (error.code === '23503') {
             return res.status(409).json({
                 error: "That supplier ID does not exist."
@@ -39,6 +42,7 @@ router.get('/products', async (req, res) => {
 
 // Get specific product with id
 router.get('/products/:id', validateId, async (req, res) => {
+    //Id requierd for finding specific product
     const id = parseInt(req.params.id);
     try {
         const product = await productRepository.getIdProduct(id);
@@ -59,6 +63,7 @@ router.get('/products/:id', validateId, async (req, res) => {
 
 // Update specific product with id
 router.put('/products/:id', validateProduct, validateId, async (req, res) => {
+    //Reqiuerd input data to update product
     const { name, amount, price, category, supplier_id } = req.body;
     const id = parseInt(req.params.id);
     //Update products
@@ -69,7 +74,7 @@ router.put('/products/:id', validateProduct, validateId, async (req, res) => {
             product
         });
 
-    } catch (error) {
+    } catch (error) { //Database error handling
         if (error.message === "Product not found") {
             return res.status(404).json({
                 error: "Product not found."
@@ -89,6 +94,7 @@ router.put('/products/:id', validateProduct, validateId, async (req, res) => {
 
 // Delete specific product with id
 router.delete('/products/:id', validateId, async (req, res) => {
+    //Reqiured input data to find id
     const id = parseInt(req.params.id);
     try {
         //Validate if product exists
@@ -112,5 +118,5 @@ router.delete('/products/:id', validateId, async (req, res) => {
 
 });
 
-
+//Export
 export const productRoutes = router;
