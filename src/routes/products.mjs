@@ -14,6 +14,11 @@ router.post('/products', validateProduct, async (req, res) => {
         const product = await productRepository.postProduct(name, amount, price, category, supplier_id);
         res.status(201).json({ message: "Product created.", product });
     } catch (error) {
+        if (error.code === '23503') {
+            return res.status(409).json({
+                error: "That supplier ID does not exist."
+            })
+        }
         console.error("Database Fault:", error);
         res.status(500).json({
             error: "Could not create product."
@@ -68,6 +73,11 @@ router.put('/products/:id', validateProduct, validateId, async (req, res) => {
         if (error.message === "Product not found") {
             return res.status(404).json({
                 error: "Product not found."
+            })
+        }
+        if (error.code === '23503') {
+            return res.status(409).json({
+                error: "That supplier ID does not exist."
             })
         }
         console.error("Database fault", error);

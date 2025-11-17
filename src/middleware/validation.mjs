@@ -24,15 +24,22 @@ export const validateProduct = (req, res, next) => {
 
     if (price !== undefined && typeof price !== "number") {
         res.status(400).json({
-            error: "'price' must be numbers."
+            error: "'price' must be a number."
         });
         return;
     }
 
     if (amount !== undefined && typeof amount !== "number") {
         res.status(400).json({
-            error: "'amount' must be number."
+            error: "'amount' must be a number."
         });
+        return;
+    }
+
+    if (supplier_id !== undefined && typeof supplier_id !== "number") {
+        res.status(400).json({
+            error: "'supplier_id' must be a number"
+        })
         return;
     }
 

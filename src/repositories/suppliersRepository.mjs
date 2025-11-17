@@ -1,5 +1,3 @@
-
-import e from 'express';
 import { pool } from '../config/pool.mjs';
 
 export async function getAllSuppliers() {
@@ -24,7 +22,7 @@ export async function getSupplierAmount(id) {
 
 export async function getAllProductsWithSupplier(id) {
 
-    const query = "SELECT products.id, products.name AS product_name, products.amount, products.price, products.category, suppliers.name AS supplier_name FROM products INNER JOIN product_suppliers ON products.id = product_suppliers.product_id INNER JOIN suppliers ON suppliers.id = product_suppliers.supplier_id WHERE suppliers.id = $1;"
+    const query = "SELECT products.id, products.name AS product_name, products.amount, products.price, products.category, suppliers.name AS supplier_name, suppliers.id AS supplier_id FROM products INNER JOIN suppliers ON suppliers.id = products.supplier_id WHERE suppliers.id = $1;"
     const values = [id];
 
     const result = await pool.query(query, values);

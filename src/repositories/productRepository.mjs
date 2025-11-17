@@ -6,6 +6,10 @@ export async function postProduct(name, price, amount, category, supplier_id) {
 
     const result = await pool.query(query, values);
 
+    if (result.rows.length === 0) {
+        throw new Error("Not a valid supplier_id");
+    }
+
     return result.rows[0];
 }
 
@@ -15,7 +19,7 @@ export async function getAllProducts() {
 }
 
 export async function getIdProduct(id) {
-    const query = "SELECT * FROM products WHERE id = $1";
+    const query = "SELECT products.*, suppliers.name AS supplier_name FROM products LEFT JOIN suppliers ON suppliers.id = products.supplier_id WHERE products.id = $1";
     const values = [id]
 
     const result = await pool.query(query, values);

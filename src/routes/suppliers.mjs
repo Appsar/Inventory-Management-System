@@ -53,6 +53,11 @@ router.get('/suppliers/:id/products', validateId, async (req, res) => {
         res.json(supplier);
 
     } catch (error) {
+        if (error.message === "Supplier not found") {
+            return res.status(404).json({
+                error: "Supplier with that 'id' not found."
+            })
+        }
         console.error("Database error", error);
         res.status(500).json({
             error: "Server fault."
@@ -94,6 +99,11 @@ router.put('/suppliers/:id', validateSupplier, validateId, async (req, res) => {
         const supplier = await suppliersRepository.updateSupplier(name, contactperson, email, phonenumber, country, id);
         res.status(200).json({ message: "Supplier update successfully", supplier })
     } catch (error) {
+        if (error.message === "Supplier not found") {
+            return res.status(404).json({
+                error: "Supplier with that 'id' not found."
+            })
+        }
         if (error.code === '23505') {
             return res.status(409).json({
                 error: "A supplier with this name already exists."
@@ -116,6 +126,11 @@ router.delete('/suppliers/:id', validateId, async (req, res) => {
         res.status(200).json({ message: "Supplier deleted successfully", supplier });
 
     } catch (error) {
+        if (error.message === "Supplier not found") {
+            return res.status(404).json({
+                error: "Supplier with that 'id' not found."
+            })
+        }
         console.error("Database error", error);
         res.status(500).json({
             error: "Server fault."
