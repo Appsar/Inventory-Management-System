@@ -20,6 +20,21 @@ export async function getAllProducts() {
     return result.rows;
 }
 
+
+//Function to search for specific product
+export async function searchName(search) {
+    const query = "SELECT * FROM products WHERE products.name LIKE $1"
+    const values = ["%" + search + "%"];
+
+    const result = await pool.query(query, values)
+
+    if (result.rows.length === 0) {
+        throw new Error("Product not found");
+    }
+
+    return result.rows;
+}
+
 //Function to get SPECIFIC product with supplier name and id
 export async function getIdProduct(id) {
     const query = "SELECT products.*, suppliers.name AS supplier_name FROM products LEFT JOIN suppliers ON suppliers.id = products.supplier_id WHERE products.id = $1";

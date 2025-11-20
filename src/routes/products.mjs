@@ -40,6 +40,26 @@ router.get('/products', async (req, res) => {
     }
 });
 
+
+// Search for prodcuts
+router.get('/products/search', async (req, res) => {
+    const search = req.query.name
+    try {
+        const product = await productRepository.searchName(search);
+        res.status(200).json(product);
+    } catch (error) {
+        if (error.message === "Product not found") {
+            return res.status(404).json({
+                error: `No products found with the search '${search}' `
+            })
+        }
+        console.error("DatabaseError", error);
+        res.status(500).json({
+            error: "Server Fault"
+        })
+    }
+});
+
 // Get specific product with id
 router.get('/products/:id', validateId, async (req, res) => {
     //Id requierd for finding specific product

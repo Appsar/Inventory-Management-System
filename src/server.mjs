@@ -7,7 +7,7 @@ dotenv.config();
 
 import { productRoutes } from './routes/products.mjs';
 import { suppliersRoutes } from './routes/suppliers.mjs';
-import createDBTables from './config/initDB.mjs'
+import { createDBTables, insertTestData } from './config/initDB.mjs'
 
 app.use('/api', productRoutes);
 app.use('/api', suppliersRoutes);
@@ -15,7 +15,9 @@ app.use('/api', suppliersRoutes);
 app.use(express.json());
 
 //Create tables if they don't exist
-createDBTables();
+await createDBTables();
+await insertTestData();
+
 
 //Start server
 app.listen(process.env.SERVER_PORT, () => {
