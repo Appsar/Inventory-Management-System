@@ -15,16 +15,19 @@ export async function postProduct(name, price, amount, category, supplier_id) {
 }
 
 //Function to get ALL products
-export async function getAllProducts() {
-    const result = await pool.query("SELECT products.id, products.name AS product_name, products.amount, products.price, products.category, products.supplier_id, suppliers.name AS supplier_name FROM products LEFT JOIN suppliers ON suppliers.id = products.supplier_id");
+export async function getAllProducts(limit, offset) {
+    const query = "SELECT products.id, products.name AS product_name, products.amount, products.price, products.category, products.supplier_id, suppliers.name AS supplier_name FROM products LEFT JOIN suppliers ON suppliers.id = products.supplier_id LIMIT $1 OFFSET $2";
+    const values = [limit, offset]
+
+    const result = await pool.query(query, values)
     return result.rows;
 }
 
 
 //Function to search for specific product
-export async function searchName(search) {
-    const query = "SELECT * FROM products WHERE products.name LIKE $1"
-    const values = ["%" + search + "%"];
+export async function searchName(search, limit, offset) {
+    const query = "SELECT * FROM products WHERE products.name LIKE $1 LIMIT $2 OFFSET $3"
+    const values = ["%" + search + "%", limit, offset];
 
     const result = await pool.query(query, values)
 

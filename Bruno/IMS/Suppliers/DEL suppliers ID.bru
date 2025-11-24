@@ -1,0 +1,16 @@
+meta {
+  name: DEL suppliers ID
+  type: http
+  seq: 7
+}
+
+delete {
+  url: http://localhost:3000/api/suppliers/1
+  body: json
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

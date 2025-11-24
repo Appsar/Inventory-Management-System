@@ -1,8 +1,11 @@
 import { pool } from '../config/pool.mjs';
 
 //Get ALL suppliers
-export async function getAllSuppliers() {
-    const result = await pool.query("SELECT * FROM suppliers");
+export async function getAllSuppliers(limit, offset) {
+    const query = "SELECT * FROM suppliers LIMIT $1 OFFSET $2"
+    const values = [limit, offset]
+
+    const result = await pool.query(query, values);
     return result.rows;
 }
 
@@ -34,6 +37,20 @@ export async function getAllProductsWithSupplier(id) {
 
     return result.rows;
 
+}
+
+//Search supplier by name
+export async function searchSupplier(search, limit, offset) {
+    const query = "SELECT * FROM suppliers WHERE suppliers.name LIKE $1 LIMIT $2 OFFSET $3"
+    const values = ["%" + search + "%", limit, offset]
+
+    const result = await pool.query(query, values)
+
+    if (result.rows.length === 0) {
+        throw new Error("Supplier not found");
+    }
+
+    return result.rows;
 }
 
 //Create a supplier

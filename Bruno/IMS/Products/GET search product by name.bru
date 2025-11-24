@@ -1,0 +1,22 @@
+meta {
+  name: GET search product by name
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:3000/api/products/search?name&limit&page
+  body: json
+  auth: inherit
+}
+
+params:query {
+  name: 
+  limit: 
+  page: 
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

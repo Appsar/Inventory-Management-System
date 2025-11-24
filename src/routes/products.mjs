@@ -2,6 +2,8 @@
 import express from 'express';
 import * as productRepository from '../repositories/productRepository.mjs';
 import { validateId, validateProduct } from '../middleware/validation.mjs';
+import { paginationMiddleware } from '../middleware/pagination.mjs';
+import { pool } from '../config/pool.mjs';
 
 
 const router = express.Router();
@@ -12,7 +14,6 @@ router.use(express.json())
 router.post('/products', validateProduct, async (req, res) => {
     //Needed input data from body
     const { name, amount, price, category, supplier_id } = req.body;
-
     try {
         const product = await productRepository.postProduct(name, amount, price, category, supplier_id);
         res.status(201).json({ message: "Product created.", product });
@@ -30,23 +31,62 @@ router.post('/products', validateProduct, async (req, res) => {
 });
 
 // Get ALL products
-router.get('/products', async (req, res) => {
+router.get('/products', paginationMiddleware, async (req, res) => {
+    const { page, limit, offset } = req.pagination;
     try {
-        const products = await productRepository.getAllProducts();
-        res.status(200).json(products)
+        //Count amount of products
+        const countAmount = await pool.query('SELECT COUNT(*) FROM products');
+        const totalCount = parseInt(countAmount.rows[0].count)
+
+        //Calculate how many pages with total amount of products
+        const totalPages = Math.ceil(totalCount / limit)
+
+        const products = await productRepository.getAllProducts(limit, offset);
+        //Respond with information about pagination
+        res.status(200).json({
+            data: products,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalCount,
+                limit
+            }
+        })
     } catch (error) {
         console.error("DatabaseError:", error);
         res.status(500).json({ error: "Server Fault" });
     }
 });
 
-
 // Search for prodcuts
-router.get('/products/search', async (req, res) => {
+router.get('/products/search', paginationMiddleware, async (req, res) => {
     const search = req.query.name
+    const { page, limit, offset } = req.pagination;
     try {
-        const product = await productRepository.searchName(search);
-        res.status(200).json(product);
+        //Count amount of products
+        const countAmount = await pool.query('SELECT COUNT(*) FROM products');
+        const totalCount = parseInt(countAmount.rows[0].count)
+
+        //Count amount found from search
+        const currentAmount = await pool.query("SELECT COUNT(*) FROM products WHERE products.name LIKE $1", ["%" + search + "%"])
+        const currentAmountFinal = parseInt(currentAmount.rows[0].count);
+
+        //Calculate how many pages with total amount of products
+        const totalPages = Math.ceil(currentAmountFinal / limit)
+
+        const products = await productRepository.searchName(search, limit, offset);
+
+        //Respond with information about pagination
+        res.status(200).json({
+            data: products,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                searchAmountFound: currentAmountFinal,
+                totalProductsCount: totalCount,
+                limit
+            }
+        })
     } catch (error) {
         if (error.message === "Product not found") {
             return res.status(404).json({
